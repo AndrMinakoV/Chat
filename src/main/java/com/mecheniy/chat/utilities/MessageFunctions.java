@@ -8,8 +8,9 @@ public class MessageFunctions {
     public static void broadcastMessage(MinecraftServer server, Component message) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             player.sendSystemMessage(message);
-        }
 
+        }
     }
+
 
 }
