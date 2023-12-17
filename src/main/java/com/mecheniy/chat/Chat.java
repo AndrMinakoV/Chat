@@ -23,34 +23,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod("chat")
 public class Chat {
     public static final String MODID = "chat";
-
-    @Mod.EventBusSubscriber(modid = Chat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-    public static class CommandRegistry {
-        @SubscribeEvent
-        public static void onRegisterCommands(RegisterCommandsEvent event) {
-            // Регистрируем новую команду
-            event.getDispatcher().register(Commands.literal("kit")
-                    .then(Commands.literal("penis")
-                            .executes(context -> kitPenis(context.getSource()))));
-        }
-
-        private static int kitPenis(CommandSourceStack source) throws CommandSyntaxException {
-            ServerPlayer player = source.getPlayerOrException();
-            // Создаем новый предмет (камень)
-            ItemStack itemStack = new ItemStack(Items.STONE, 64); // 64 камня
-
-            // Проверяем, есть ли место в инвентаре
-            if (player.getInventory().add(itemStack)) {
-                // Уведомляем игрока о получении предмета
-                source.sendSuccess(Component.literal("§aВы получили 64 камня!"), true);
-            } else {
-                // Если нет места, сообщаем об этом
-                source.sendFailure(Component.literal("§cНедостаточно места в инвентаре для камней."));
-            }
-
-            return 1; // Возвращаем успешный результат выполнения команды
-        }
-
         @Mod.EventBusSubscriber(modid = Chat.MODID)
         public static class ForgeBeautifulChatEvent {
             public static final double rangeTalk = 100;
@@ -71,4 +43,4 @@ public class Chat {
             }
         }
     }
-}
+
