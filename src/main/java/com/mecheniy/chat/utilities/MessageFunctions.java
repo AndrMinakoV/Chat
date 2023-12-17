@@ -4,12 +4,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import org.apache.logging.log4j.core.jmx.Server;
 
 public class MessageFunctions {
-    public static void broadcastMessage(MinecraftServer server, Component message) {
+    public static void broadcastMessageGlobal(MinecraftServer server, Component message) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             player.sendSystemMessage(message);
 
+        }
+    }
+    public static void broadcastMessageLocal(ServerPlayer serverPlayer, Component message){
+        MinecraftServer server = serverPlayer.getServer();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (MessageFunctions.compareCoordinateDistance(serverPlayer.getOnPos(), player.getOnPos()) <= 100){
+                player.sendSystemMessage(message);
+            }
         }
     }
 

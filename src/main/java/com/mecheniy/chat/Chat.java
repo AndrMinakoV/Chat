@@ -25,7 +25,7 @@ public class Chat {
 
         public static final double rangeTalk = 100;
         @SubscribeEvent
-        public static void onServerChat(ServerChatEvent event) {
+        public static void onServerChat(ServerChatEvent.Submitted event) {
                 ServerPlayer serverPlayer = event.getPlayer();
                 MinecraftServer server = serverPlayer.getServer();
                 String playerName = serverPlayer.getName().getString();
@@ -36,14 +36,10 @@ public class Chat {
                 if (rawMessage.startsWith("!")){
 
                     Component formattedMessage = Component.literal("§8[§6G§8] [§c" + playerName + "§8] ").append(Component.literal(rawMessage.substring(1)));
-                    MessageFunctions.broadcastMessage(server, formattedMessage);
+                    MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
                 } else {
-                    for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                        if (MessageFunctions.compareCoordinateDistance(serverPlayer.getOnPos(), player.getOnPos()) <= rangeTalk){
-                            Component formattedMessage = Component.literal("§8[§aL§8] [§c" + playerName + "§8] ").append(Component.literal(rawMessage));
-                            MessageFunctions.broadcastMessage(server, formattedMessage);
-                        }
-                    }
+                    Component formattedMessage = Component.literal("§8[§aL§8] [§c" + playerName + "§8] ").append(Component.literal(rawMessage));
+                    MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
 
 
                 }
