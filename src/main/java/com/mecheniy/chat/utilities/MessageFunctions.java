@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import org.apache.logging.log4j.core.jmx.Server;
 
 public class MessageFunctions {
     public static void broadcastMessageGlobal(MinecraftServer server, Component message) {
