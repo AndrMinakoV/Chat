@@ -1,6 +1,7 @@
 package com.mecheniy.chat;
 
 import ca.weblite.objc.Client;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -22,65 +23,52 @@ import net.minecraftforge.fml.common.Mod;
 @Mod("chat")
 public class Chat {
     public static final String MODID = "chat";
-        @Mod.EventBusSubscriber(modid = Chat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-        public static class CommandRegistry {
-            @SubscribeEvent
-            public static void onRegisterCommands(RegisterCommandsEvent event) {
-                // Регистрируем новую команду
-                event.getDispatcher().register(Commands.literal("kit")
-                        .then(Commands.literal("penis")
-                                .executes(context -> kitPenis(context.getSource()))));
-            }
 
-            private static int kitPenis(CommandSourceStack source) {
-                if (source.getEntity() instanceof ServerPlayer) {
-                    ServerPlayer player = (ServerPlayer) source.getEntity();
-                    // Создаем новый предмет (камень)
-                    ItemStack itemStack = new ItemStack(Items.STONE, 64); // 64 камня
-
-                    // Проверяем, есть ли место в инвентаре
-                    if (player.getInventory().add(itemStack)) {
-                        // Уведомляем игрока о получении предмета
-                        source.sendSuccess(Component.literal("§aВы получили 64 камня!"), true);
-                    } else {
-                        // Если нет места, сообщаем об этом
-                        source.sendFailure(Component.literal("§cНедостаточно места в инвентаре для камней."));
-                    }
-                } else {
-                    source.sendFailure(Component.literal("§cЭту команду может использовать только игрок."));
-                }
-                return 1; // Возвращаем успешный результат выполнения команды
-            }
-    @Mod.EventBusSubscriber(modid = Chat.MODID)
-    public static class ForgeBeautifulChatEvent {
-
-        public static final double rangeTalk = 100;
+    @Mod.EventBusSubscriber(modid = Chat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    public static class CommandRegistry {
         @SubscribeEvent
-        public static void onServerChat(ServerChatEvent.Submitted event) {
+        public static void onRegisterCommands(RegisterCommandsEvent event) {
+            // Регистрируем новую команду
+            event.getDispatcher().register(Commands.literal("kit")
+                    .then(Commands.literal("penis")
+                            .executes(context -> kitPenis(context.getSource()))));
+        }
+
+        private static int kitPenis(CommandSourceStack source) throws CommandSyntaxException {
+            ServerPlayer player = source.getPlayerOrException();
+            // Создаем новый предмет (камень)
+            ItemStack itemStack = new ItemStack(Items.STONE, 64); // 64 камня
+
+            // Проверяем, есть ли место в инвентаре
+            if (player.getInventory().add(itemStack)) {
+                // Уведомляем игрока о получении предмета
+                source.sendSuccess(Component.literal("§aВы получили 64 камня!"), true);
+            } else {
+                // Если нет места, сообщаем об этом
+                source.sendFailure(Component.literal("§cНедостаточно места в инвентаре для камней."));
+            }
+
+            return 1; // Возвращаем успешный результат выполнения команды
+        }
+
+        @Mod.EventBusSubscriber(modid = Chat.MODID)
+        public static class ForgeBeautifulChatEvent {
+            public static final double rangeTalk = 100;
+            @SubscribeEvent
+            public static void onServerChat(ServerChatEvent.Submitted event) {
                 ServerPlayer serverPlayer = event.getPlayer();
                 MinecraftServer server = serverPlayer.getServer();
                 String playerName = serverPlayer.getName().getString();
                 String rawMessage = event.getMessage().getString();
-
-
                 event.setCanceled(true);
-                if (rawMessage.startsWith("!")){
-
+                if (rawMessage.startsWith("!")) {
                     Component formattedMessage = Component.literal("§8[§6G§8] [§c" + playerName + "§8] ").append(Component.literal(rawMessage.substring(1)));
                     MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
                 } else {
                     Component formattedMessage = Component.literal("§8[§aL§8] [§c" + playerName + "§8] ").append(Component.literal(rawMessage));
                     MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-
-
                 }
-
-
-
-
             }
-
-
+        }
     }
-}
 }
