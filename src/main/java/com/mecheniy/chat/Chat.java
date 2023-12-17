@@ -19,8 +19,8 @@ public class Chat {
     @Mod.EventBusSubscriber(modid = Chat.MODID)
     public static class ForgeBeautifulChatEvent {
         @SubscribeEvent
-        public static void onServerChat(ServerChatEvent.Submitted event) {
-
+        public static void onServerChat(ServerChatEvent event) {
+            System.out.println("Test suc");
                 ServerPlayer serverPlayer = event.getPlayer();
                 MinecraftServer server = serverPlayer.getServer();
                 String playerName = serverPlayer.getName().getString();
