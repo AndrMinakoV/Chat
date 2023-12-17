@@ -49,7 +49,6 @@ public class CommandRegistry {
 
     private static int kitCommand(CommandSourceStack source, String kitName) {
         initConfigLoader(); // Ensure configuration is loaded
-
         ServerPlayer player;
         try {
             player = source.getPlayerOrException();

@@ -1,5 +1,6 @@
 package com.mecheniy.chat.utilities;
 
+import com.mecheniy.chat.Chat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
@@ -15,7 +16,8 @@ public class MessageFunctions {
     public static void broadcastMessageLocal(ServerPlayer serverPlayer, Component message){
         MinecraftServer server = serverPlayer.getServer();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (MessageFunctions.compareCoordinateDistance(serverPlayer.getOnPos(), player.getOnPos()) <= 100 && player.getLevel() == serverPlayer.getLevel()){
+            if (MessageFunctions.compareCoordinateDistance(serverPlayer.getOnPos(), player.getOnPos()) <= Chat.ForgeBeautifulChatEvent.rangeTalk
+            && player.getLevel() == serverPlayer.getLevel()){
                 player.sendSystemMessage(message);
             }
         }
