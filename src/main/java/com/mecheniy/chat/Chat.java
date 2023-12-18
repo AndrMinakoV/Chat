@@ -34,6 +34,7 @@ public class Chat {
                 } else {
                     Component formattedMessage = Component.literal("§8[" + formattedTime + "] [§aL§8] §c" + playerName + "§8: ").append(Component.literal(rawMessage));
                     MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
+                    //1
                 }
             }
         }
