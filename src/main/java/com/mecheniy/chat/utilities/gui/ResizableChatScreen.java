@@ -21,25 +21,19 @@ public class ResizableChatScreen extends Screen {
         this.chatHeight = 100; // начальная высота чата
     }
 
-// ...
-
-    // В вашем методе init()
     @Override
     protected void init() {
         super.init();
         this.chatInputField = new EditBox(this.font, this.width / 2 - chatWidth / 2, this.height - 30, chatWidth, 20, Component.literal(""));
         this.addWidget(this.chatInputField);
 
-        // Увеличиваем размер кнопки для изменения размера
-        int buttonSize = 20; // Установите заметный размер для кнопки, например 20x20 пикселей
-        this.resizeButton = new Button(this.width / 2 + chatWidth / 2 - buttonSize, this.height - chatHeight - buttonSize, buttonSize, buttonSize, Component.literal("↘"), button -> {
+        // Увеличиваем размер кнопки для изменения размера до 100x100 для наглядности
+        int buttonSize = 100;
+        this.resizeButton = new Button(this.width - buttonSize, 0, buttonSize, buttonSize, Component.literal("↘"), button -> {
             // Логика обработки изменения размера окна чата
         });
         this.addWidget(this.resizeButton);
     }
-
-// ...
-
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
@@ -73,7 +67,6 @@ public class ResizableChatScreen extends Screen {
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
-
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (this.resizing) {
@@ -87,8 +80,8 @@ public class ResizableChatScreen extends Screen {
         this.chatWidth = width;
         this.chatHeight = height;
         this.chatInputField.setWidth(chatWidth);
-        // Перемещаем кнопку изменения размера в соответствии с новыми размерами
-        this.resizeButton.x = this.width / 2 + chatWidth / 2 - 8;
-        this.resizeButton.y = this.height - chatHeight - 22;
+        // Обновляем положение кнопки изменения размера
+        this.resizeButton.x = this.width - resizeButton.getWidth();
+        this.resizeButton.y = 0; // Верхний правый угол
     }
 }
