@@ -20,7 +20,7 @@ public class MessageFunctions {
             && player.getLevel() == serverPlayer.getLevel()){
                 player.sendSystemMessage(message);
             }
-        }
+        }//
     }
 
     public static double compareCoordinateDistance(BlockPos playerPos1, BlockPos playerPos2){
