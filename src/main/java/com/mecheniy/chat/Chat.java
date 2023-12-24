@@ -1,5 +1,6 @@
 package com.mecheniy.chat;
 
+import com.mecheniy.chat.utilities.DiscordBot;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
@@ -10,6 +11,9 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import com.mecheniy.chat.utilities.MessageFunctions;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
@@ -20,6 +24,15 @@ public class Chat {
     public static final String MODID = "chat";
     private static final Logger LOGGER = Logger.getLogger(MODID);
 
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ModServerEvents {
+        // Этот метод будет вызван при инициализации сервера
+        @SubscribeEvent
+        public static void onDedicatedServerSetup(FMLDedicatedServerSetupEvent  event) {
+            DiscordBot.initialize(); // Инициализируем бота Discord
+
+        }
+    }
     @Mod.EventBusSubscriber(modid = Chat.MODID)
     public static class ForgeBeautifulChatEvent {
         public static final double rangeTalk = 100;
