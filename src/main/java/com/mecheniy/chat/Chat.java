@@ -14,6 +14,7 @@ import com.mecheniy.chat.utilities.MessageFunctions;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 
+import javax.security.auth.login.LoginException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
@@ -28,9 +29,13 @@ public class Chat {
     public static class ModServerEvents {
         // Этот метод будет вызван при инициализации сервера
         @SubscribeEvent
-        public static void onDedicatedServerSetup(FMLDedicatedServerSetupEvent  event) {
-            DiscordBot.initialize(); // Инициализируем бота Discord
-
+        public static void onDedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
+            try {
+                DiscordBot.initialize(); // Инициализируем бота Discord
+            } catch (LoginException e) {
+                // Обработка исключения. Здесь вы можете логировать ошибку или предпринимать дальнейшие действия.
+                e.printStackTrace(); // Например, вывести трассировку стека.
+            }
         }
     }
     @Mod.EventBusSubscriber(modid = Chat.MODID)
@@ -41,7 +46,7 @@ public class Chat {
         public static void onServerChat(ServerChatEvent.Submitted event) {
             ServerPlayer serverPlayer = event.getPlayer();
 
-             /*User user = LuckPermsProvider.get().getUserManager().getUser(serverPlayer.getUUID());
+             User user = LuckPermsProvider.get().getUserManager().getUser(serverPlayer.getUUID());
             String prefix = "";
             if (user != null) {
                 CachedMetaData metaData = user.getCachedData().getMetaData();
@@ -49,7 +54,7 @@ public class Chat {
                 if (prefix == null) {
                     prefix = "";
                 }
-            } */
+            }
 
             LocalTime timeNow = LocalTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -65,13 +70,13 @@ public class Chat {
                 chatTag = "G";
                 // Убираем первый символ для глобального чата
                 String messageWithoutFirstChar = rawMessage.substring(1);
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  +  /* prefix  + */ " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  +   prefix  +  " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));
                 MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
                 // Логирование сообщения без первого символа
                 System.out.println("[" + formattedTime + "] [" + chatTag + "] " + playerName + ": " + messageWithoutFirstChar);
             } else {
                 chatTag = "L";
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] "  +  /* prefix  + */ " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] "  +   prefix  +  " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
                 // Логирование локального сообщения
                 System.out.println("[" + formattedTime + "] [" + chatTag + "] " + playerName + ": " + rawMessage);
