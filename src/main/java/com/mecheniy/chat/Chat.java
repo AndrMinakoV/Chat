@@ -62,13 +62,13 @@ public class Chat {
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " +  formattedDate + chatTag + "] " + prefix + playerName + ": " + messageWithoutFirstChar);
+                logMessageToFile("[" + formattedTime + " | " +  formattedDate + " [" + chatTag + "] " + prefix + playerName + ": " + messageWithoutFirstChar.replaceAll("§[0-9a-fA-F]", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar);
             } else {
                 chatTag = "L";
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " + formattedDate + chatTag + "] " + prefix + playerName + ": " + rawMessage);
+                logMessageToFile("[" + formattedTime + " | " + formattedDate + " [" +chatTag + "] " + prefix + playerName + ": " + rawMessage.replaceAll("§[0-9a-fA-F]", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ");
 
             }
