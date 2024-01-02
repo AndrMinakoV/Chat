@@ -16,6 +16,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
+import com.mecheniy.chat.utilities.MessageFunctions;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
 
 @Mod("chat")
 public class Chat {
@@ -30,11 +34,23 @@ public class Chat {
         @SubscribeEvent
         public static void onServerChat(ServerChatEvent.Submitted event) {
             ServerPlayer serverPlayer = event.getPlayer();
+            User user = LuckPermsProvider.get().getUserManager().getUser(serverPlayer.getUUID());
+            String prefix = "";
+            if (user != null) {
+                CachedMetaData metaData = user.getCachedData().getMetaData();
+                prefix = metaData.getPrefix();
+                if (prefix == null) {
+                    prefix = "";
+                }
+            }
+
 
             LocalTime timeNow = LocalTime.now();
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             String formattedTime = timeNow.format(timeFormatter);
-
+            LocalDate dateNow = LocalDate.now();
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String formattedDate = dateNow.format(dateFormatter);
             MinecraftServer server = serverPlayer.getServer();
             String playerName = serverPlayer.getName().getString();
             String rawMessage = event.getMessage().getString();
@@ -45,14 +61,16 @@ public class Chat {
             if (rawMessage.startsWith("!")) {
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] " + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));
-                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                logMessageToFile("[" + formattedTime + "] [" + chatTag + "] " + playerName + ": " + messageWithoutFirstChar);
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
+                logMessageToFile("[" + formattedTime + " | " +  formattedDate + chatTag + "] " + prefix + playerName + ": " + messageWithoutFirstChar);
+                System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar);
             } else {
                 chatTag = "L";
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                logMessageToFile("[" + formattedTime + "] [" + chatTag + "] " + playerName + ": " + rawMessage);
+                logMessageToFile("[" + formattedTime + " | " + formattedDate + chatTag + "] " + prefix + playerName + ": " + rawMessage);
+                System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ");
+
             }
         }
 
@@ -60,9 +78,15 @@ public class Chat {
             LocalDate dateNow = LocalDate.now();
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             String formattedDate = dateNow.format(dateFormatter);
+            String logDirectoryPath = "/home/mecheniy/server/MagicRPG1192_logger_public_logs/logs"; // Указываем путь к директории логов
             String fileName = formattedDate + ".txt";
 
-            File logFile = new File(fileName);
+            File logDirectory = new File(logDirectoryPath);
+            if (!logDirectory.exists()) {
+                logDirectory.mkdirs(); // Создаем директорию, если она не существует
+            }
+
+            File logFile = new File(logDirectory, fileName);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
                 // Логируем путь к файлу для устранения неполадок
                 LOGGER.info("Writing to log file: " + logFile.getAbsolutePath());
@@ -77,6 +101,7 @@ public class Chat {
                 LOGGER.severe("Could not write to log file: " + e.getMessage());
             }
         }
+
 
     }
 }
