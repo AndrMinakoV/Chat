@@ -1,6 +1,9 @@
 package com.mecheniy.chat;
 
 import com.mecheniy.chat.utilities.MessageFunctions;
+import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +25,7 @@ import com.mecheniy.chat.utilities.MessageFunctions;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 @Mod("chat")
 public class Chat {
@@ -60,19 +64,20 @@ public class Chat {
             String chatTag;
             Component formattedMessage;
 
-            if (rawMessage.startsWith("!")) {
+           if (rawMessage.startsWith("!")){
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
                 logMessageToFile("[" + formattedTime + " | " +  formattedDate + " [" + chatTag + "] " + prefix + playerName + ": " + messageWithoutFirstChar.replaceAll("§[0-9a-fA-F]", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar);
-            } else {
+
+            }
+            else {
                 chatTag = "L";
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
                 logMessageToFile("[" + formattedTime + " | " + formattedDate + " [" +chatTag + "] " + prefix + playerName + ": " + rawMessage.replaceAll("§[0-9a-fA-F]", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ");
-
             }
         }
 
@@ -106,25 +111,22 @@ public class Chat {
         @Mod.EventBusSubscriber
         public static class CommandLogger {
 
-            @SubscribeEvent
-            public static void onServerChat(ServerChatEvent event) {
-                ServerPlayer player = event.getPlayer();
-                String message = event.getMessage().getString();
 
-                // Проверяем, является ли сообщение командой
-                if (message.startsWith("/")) {
-                    // Если да, логируем как команду
-                    logCommand(player.getGameProfile().getName(), message);
-                } else {
-                    // Иначе, обрабатываем как обычное сообщение
-                    // ... [ваш код для обработки обычных сообщений] ...
+            @SubscribeEvent
+            public static void onCommand(CommandEvent event) {
+                CommandSourceStack source = event.getParseResults().getContext().getSource();
+                try {
+                    ServerPlayer player = source.getPlayerOrException();
+                    String playerName = player.getName().getString(); // Теперь мы получаем имя игрока таким образом
+                    String command = event.getParseResults().getReader().getString();
+                    logMessageToFile("Player " + playerName + " executed command: " + command);
+                } catch (CommandSyntaxException e) {
+                    logMessageToFile("A non-player source executed command: ");
                 }
             }
 
-            private static void logCommand(String playerName, String command) {
-                // Функция логирования команд
-                logMessageToFile("Player " + playerName + " executed command: " + command);
-            }
+
+
 
 
             @Mod.EventBusSubscriber(modid = Chat.MODID)
