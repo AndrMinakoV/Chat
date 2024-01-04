@@ -68,7 +68,7 @@ public class Chat {
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " +  formattedDate + " [" + chatTag + "] " + prefix + playerName + ": " + messageWithoutFirstChar.replaceAll("§[0-9a-fA-F]", ""));
+                logMessageToFile("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar.replaceAll("§.", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar);
 
             }
@@ -76,7 +76,7 @@ public class Chat {
                 chatTag = "L";
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " + formattedDate + " [" +chatTag + "] " + prefix + playerName + ": " + rawMessage.replaceAll("§[0-9a-fA-F]", ""));
+                logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage.replaceAll("§.", ""));
                 System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ");
             }
         }
@@ -114,12 +114,18 @@ public class Chat {
 
             @SubscribeEvent
             public static void onCommand(CommandEvent event) {
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                LocalDate dateNow = LocalDate.now();
+                LocalTime timeNow = LocalTime.now();
+                String formattedTime = timeNow.format(timeFormatter);
+                String formattedDate = dateNow.format(dateFormatter);
                 CommandSourceStack source = event.getParseResults().getContext().getSource();
                 try {
                     ServerPlayer player = source.getPlayerOrException();
                     String playerName = player.getName().getString(); // Теперь мы получаем имя игрока таким образом
                     String command = event.getParseResults().getReader().getString();
-                    logMessageToFile("Player " + playerName + " executed command: " + command);
+                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " использовал команду: " + command);
                 } catch (CommandSyntaxException e) {
                     logMessageToFile("A non-player source executed command: ");
                 }
@@ -132,46 +138,31 @@ public class Chat {
             @Mod.EventBusSubscriber(modid = Chat.MODID)
             public class PlayerActivityLogger {
 
-                private static final String logDirectoryPath = "/home/mecheniy/server/MagicRPG1192_logger_public_logs/logs";
-
-                private static void logMessageToFile(String message) {
-                    LocalDate dateNow = LocalDate.now();
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                    String formattedDate = dateNow.format(dateFormatter);
-                    String fileName = formattedDate + ".txt";
-
-                    File logDirectory = new File(logDirectoryPath);
-                    if (!logDirectory.exists()) {
-                        logDirectory.mkdirs(); // Создаем директорию, если она не существует
-                    }
-
-                    File logFile = new File(logDirectory, fileName);
-                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
-                        writer.write(message);
-                        writer.newLine();
-                    } catch (IOException e) {
-                        // Здесь должен быть ваш логгер, записывающий ошибки логирования
-                    }
-                }
-
-                private static String getCurrentTimeFormatted() {
-                    LocalTime timeNow = LocalTime.now();
-                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                    return timeNow.format(timeFormatter);
-                }
 
                 @SubscribeEvent
                 public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    LocalDate dateNow = LocalDate.now();
+                    LocalTime timeNow = LocalTime.now();
+                    String formattedTime = timeNow.format(timeFormatter);
+                    String formattedDate = dateNow.format(dateFormatter);
                     ServerPlayer player = (ServerPlayer) event.getEntity();
                     String playerName = player.getGameProfile().getName();
-                    logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged in");
+                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " зашел.");
                 }
 
                 @SubscribeEvent
                 public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    LocalDate dateNow = LocalDate.now();
+                    LocalTime timeNow = LocalTime.now();
+                    String formattedTime = timeNow.format(timeFormatter);
+                    String formattedDate = dateNow.format(dateFormatter);
                     ServerPlayer player = (ServerPlayer) event.getEntity();
                     String playerName = player.getGameProfile().getName();
-                    logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged out");
+                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " вышел.");
                 }
 
             }}
