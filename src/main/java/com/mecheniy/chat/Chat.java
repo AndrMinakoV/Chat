@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -126,40 +127,52 @@ public class Chat {
             }
 
 
-            @Mod.EventBusSubscriber
+            @Mod.EventBusSubscriber(modid = Chat.MODID)
             public class PlayerActivityLogger {
 
-                @Mod.EventBusSubscriber(modid = Chat.MODID)
-                public static class ChatEventHandler {
+                private static final String logDirectoryPath = "/home/mecheniy/server/MagicRPG1192_logger_public_logs/logs";
 
-                    // ... [остальные методы и переменные] ...
+                private static void logMessageToFile(String message) {
+                    LocalDate dateNow = LocalDate.now();
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    String formattedDate = dateNow.format(dateFormatter);
+                    String fileName = formattedDate + ".txt";
 
-                    @SubscribeEvent
-                    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-                        ServerPlayer player = event.getPlayer(); // Используйте этот вызов, он работает
-                        String playerName = player.getGameProfile().getName();
-                        logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged in");
+                    File logDirectory = new File(logDirectoryPath);
+                    if (!logDirectory.exists()) {
+                        logDirectory.mkdirs(); // Создаем директорию, если она не существует
                     }
 
-                    @SubscribeEvent
-                    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-                        ServerPlayer player = event.getPlayer(); // Аналогично для выхода из игры
-                        String playerName = player.getGameProfile().getName();
-                        logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged out");
+                    File logFile = new File(logDirectory, fileName);
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
+                        writer.write(message);
+                        writer.newLine();
+                    } catch (IOException e) {
+                        // Здесь должен быть ваш логгер, записывающий ошибки логирования
                     }
-
-                    // Вспомогательный метод для получения текущего времени в нужном формате
-                    private static String getCurrentTimeFormatted() {
-                        LocalTime timeNow = LocalTime.now();
-                        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                        return timeNow.format(timeFormatter);
-                    }
-
-                    // ... [метод logMessageToFile и другие методы] ...
-
                 }
-            }
 
+                private static String getCurrentTimeFormatted() {
+                    LocalTime timeNow = LocalTime.now();
+                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                    return timeNow.format(timeFormatter);
+                }
+
+                @SubscribeEvent
+                public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+                    ServerPlayer player = (ServerPlayer) event.getEntity();
+                    String playerName = player.getGameProfile().getName();
+                    logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged in");
+                }
+
+                @SubscribeEvent
+                public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+                    ServerPlayer player = (ServerPlayer) event.getEntity();
+                    String playerName = player.getGameProfile().getName();
+                    logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged out");
+                }
+
+            }}
 
 
 
