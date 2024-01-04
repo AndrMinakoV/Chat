@@ -4,10 +4,11 @@ import com.mecheniy.chat.utilities.MessageFunctions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -101,7 +102,67 @@ public class Chat {
                 LOGGER.severe("Could not write to log file: " + e.getMessage());
             }
         }
+        @Mod.EventBusSubscriber
+        public static class CommandLogger {
+
+            @SubscribeEvent
+            public static void onServerChat(ServerChatEvent event) {
+                ServerPlayer player = event.getPlayer();
+                String message = event.getMessage().getString();
+
+                // Проверяем, является ли сообщение командой
+                if (message.startsWith("/")) {
+                    // Если да, логируем как команду
+                    logCommand(player.getGameProfile().getName(), message);
+                } else {
+                    // Иначе, обрабатываем как обычное сообщение
+                    // ... [ваш код для обработки обычных сообщений] ...
+                }
+            }
+
+            private static void logCommand(String playerName, String command) {
+                // Функция логирования команд
+                logMessageToFile("Player " + playerName + " executed command: " + command);
+            }
 
 
-    }
+            @Mod.EventBusSubscriber
+            public class PlayerActivityLogger {
+
+                @Mod.EventBusSubscriber(modid = Chat.MODID)
+                public static class ChatEventHandler {
+
+                    // ... [остальные методы и переменные] ...
+
+                    @SubscribeEvent
+                    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+                        ServerPlayer player = event.getPlayer(); // Используйте этот вызов, он работает
+                        String playerName = player.getGameProfile().getName();
+                        logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged in");
+                    }
+
+                    @SubscribeEvent
+                    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+                        ServerPlayer player = event.getPlayer(); // Аналогично для выхода из игры
+                        String playerName = player.getGameProfile().getName();
+                        logMessageToFile("[" + getCurrentTimeFormatted() + "] Player " + playerName + " logged out");
+                    }
+
+                    // Вспомогательный метод для получения текущего времени в нужном формате
+                    private static String getCurrentTimeFormatted() {
+                        LocalTime timeNow = LocalTime.now();
+                        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                        return timeNow.format(timeFormatter);
+                    }
+
+                    // ... [метод logMessageToFile и другие методы] ...
+
+                }
+            }
+
+
+
+
+
+        }
 }
