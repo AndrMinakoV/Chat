@@ -67,17 +67,18 @@ public class Chat {
            if (rawMessage.startsWith("!")){
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar.replaceAll("§.", ""));
-                System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar);
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar.replaceAll("&([0-9a-fk-or])", "§$1")));
+                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
+                logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
+                System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
 
             }
             else {
                 chatTag = "L";
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
+                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage.replaceAll("&([0-9a-fk-or])", "§$1")));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage.replaceAll("§.", ""));
-                System.out.println("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ");
+                logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
+                System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
             }
         }
 
@@ -85,7 +86,7 @@ public class Chat {
             LocalDate dateNow = LocalDate.now();
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             String formattedDate = dateNow.format(dateFormatter);
-            String logDirectoryPath = "/home/mecheniy/server/MagicRPG1192_logger_public_logs/logs"; // Указываем путь к директории логов
+            String logDirectoryPath = "/home/andrey/mecheniy/server/MagicRPG1192_logger_public_logs/logs"; // Указываем путь к директории логов
             String fileName = formattedDate + ".txt";
 
             File logDirectory = new File(logDirectoryPath);
@@ -96,11 +97,11 @@ public class Chat {
             File logFile = new File(logDirectory, fileName);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
                 // Логируем путь к файлу для устранения неполадок
-                LOGGER.info("Writing to log file: " + logFile.getAbsolutePath());
+                //LOGGER.info("Writing to log file: " + logFile.getAbsolutePath());
 
                 if (!logFile.exists()) {
                     boolean fileCreated = logFile.createNewFile();
-                    LOGGER.info("Log file created: " + fileCreated + " Path: " + logFile.getAbsolutePath());
+                    //LOGGER.info("Log file created: " + fileCreated + " Path: " + logFile.getAbsolutePath());
                 }
                 writer.write(message);
                 writer.newLine();
@@ -125,7 +126,8 @@ public class Chat {
                     ServerPlayer player = source.getPlayerOrException();
                     String playerName = player.getName().getString(); // Теперь мы получаем имя игрока таким образом
                     String command = event.getParseResults().getReader().getString();
-                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " использовал команду: " + command);
+                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + "[CMD] " + playerName + ": /" + command);
+                    System.out.println("[" + formattedTime + " | " + formattedDate + "] " + "[CMD] " + playerName + ": /" + command);
                 } catch (CommandSyntaxException e) {
                     logMessageToFile("A non-player source executed command: ");
                 }
