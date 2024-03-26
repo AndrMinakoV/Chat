@@ -139,19 +139,10 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
     compileOnly 'net.luckperms:api:5.4' // Убедитесь, что версия соответствует той, что вам нужна
     implementation ("net.dv8tion:JDA:5.0.0-beta.1") // Убедитесь, что версия соответствует той, что требуется для discord4j-core
+    implementation "org.enigma:neologger:1.0"
 
 
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
 
-    // Examples using mod jars from ./libs
-    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 // Настройте task shadowJar, чтобы он создавал fat JAR с вашим модом и его зависимостями
 
@@ -181,8 +172,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = 'org.enigma'
-            artifactId = 'chat'
-            version = "0.9-SNAPSHOT"
+            artifactId = 'neochat'
+            version = "1.0.2"
 
             from components.java
 
@@ -195,7 +186,7 @@ publishing {
     }
     repositories {
         maven {
-            url "maven.pkg.jetbrains.space/neoxygen/p/enigmarpg/enigma"
+            url "https://maven.pkg.jetbrains.space/neoxygen/p/enigmarpg/enigma"
             credentials {
                 username = spaceUsername
                 password = spacePassword

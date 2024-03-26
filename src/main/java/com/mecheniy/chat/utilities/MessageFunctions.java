@@ -7,6 +7,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
 public class MessageFunctions {
+
+
+
     public static void broadcastMessageGlobal(MinecraftServer server, Component message) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             player.sendSystemMessage(message);
@@ -21,6 +24,11 @@ public class MessageFunctions {
                 player.sendSystemMessage(message);
             }
         }
+    }
+
+    public static void broadcastMcSkillMessage(ServerPlayer serverPlayer, String string){
+        Component finalMessage = Component.literal(  "§8[§6" + ChatConfig.chatName.get() + "§8]: " + "§7" + string);
+        serverPlayer.sendSystemMessage(finalMessage);
     }
 
     public static double compareCoordinateDistance(BlockPos playerPos1, BlockPos playerPos2){

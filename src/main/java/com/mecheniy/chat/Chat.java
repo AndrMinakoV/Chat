@@ -1,8 +1,11 @@
 package com.mecheniy.chat;
 
+import com.mecheniy.chat.utilities.ChatConfig;
 import com.mecheniy.chat.utilities.MessageFunctions;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.neoxygen.neologger.NeoLogger;
+import com.neoxygen.neologger.chat.MessageLogger;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -12,6 +15,7 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,12 +30,28 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod("chat")
 public class Chat {
     public static final String MODID = "chat";
     private static final Logger LOGGER = Logger.getLogger(MODID);
 
+    public Chat(){
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ChatConfig.spec);
+
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+    }
+
+    private void setup(final FMLCommonSetupEvent event) {
+        // Здесь считываем конфигурацию
+        String chatName = ChatConfig.chatName.get();
+        // Применяем настройки, считанные из конфига
+        System.out.println("Название чата из конфига: " + chatName);
+        // Здесь можете добавить код, который должен выполниться с учетом настроек конфига перед запуском сервера
+    }
     @Mod.EventBusSubscriber(modid = Chat.MODID)
     public static class ForgeBeautifulChatEvent {
 
@@ -69,7 +89,7 @@ public class Chat {
                 String messageWithoutFirstChar = rawMessage.substring(1);
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar.replaceAll("&([0-9a-fk-or])", "§$1")));
                 MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
+                MessageLogger.logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
 
             }
@@ -77,100 +97,9 @@ public class Chat {
                 chatTag = "L";
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage.replaceAll("&([0-9a-fk-or])", "§$1")));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
+                MessageLogger.logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
             }
         }
-
-        private static void logMessageToFile(String message) {
-            LocalDate dateNow = LocalDate.now();
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String formattedDate = dateNow.format(dateFormatter);
-            String logDirectoryPath = "/home/andrey/mecheniy/server/MagicRPG1192_logger_public_logs/logs"; // Указываем путь к директории логов
-            String fileName = formattedDate + ".txt";
-
-            File logDirectory = new File(logDirectoryPath);
-            if (!logDirectory.exists()) {
-                logDirectory.mkdirs(); // Создаем директорию, если она не существует
-            }
-
-            File logFile = new File(logDirectory, fileName);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
-                // Логируем путь к файлу для устранения неполадок
-                //LOGGER.info("Writing to log file: " + logFile.getAbsolutePath());
-
-                if (!logFile.exists()) {
-                    boolean fileCreated = logFile.createNewFile();
-                    //LOGGER.info("Log file created: " + fileCreated + " Path: " + logFile.getAbsolutePath());
-                }
-                writer.write(message);
-                writer.newLine();
-            } catch (IOException e) {
-                LOGGER.severe("Could not write to log file: " + e.getMessage());
-            }
-        }
-        @Mod.EventBusSubscriber
-        public static class CommandLogger {
-
-
-            @SubscribeEvent
-            public static void onCommand(CommandEvent event) {
-                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                LocalDate dateNow = LocalDate.now();
-                LocalTime timeNow = LocalTime.now();
-                String formattedTime = timeNow.format(timeFormatter);
-                String formattedDate = dateNow.format(dateFormatter);
-                CommandSourceStack source = event.getParseResults().getContext().getSource();
-                try {
-                    ServerPlayer player = source.getPlayerOrException();
-                    String playerName = player.getName().getString(); // Теперь мы получаем имя игрока таким образом
-                    String command = event.getParseResults().getReader().getString();
-                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + "[CMD] " + playerName + ": /" + command);
-                    System.out.println("[" + formattedTime + " | " + formattedDate + "] " + "[CMD] " + playerName + ": /" + command);
-                } catch (CommandSyntaxException e) {
-                    logMessageToFile("A non-player source executed command: ");
-                }
-            }
-
-
-
-
-
-            @Mod.EventBusSubscriber(modid = Chat.MODID)
-            public class PlayerActivityLogger {
-
-
-                @SubscribeEvent
-                public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                    LocalDate dateNow = LocalDate.now();
-                    LocalTime timeNow = LocalTime.now();
-                    String formattedTime = timeNow.format(timeFormatter);
-                    String formattedDate = dateNow.format(dateFormatter);
-                    ServerPlayer player = (ServerPlayer) event.getEntity();
-                    String playerName = player.getGameProfile().getName();
-                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " зашел.");
-                }
-
-                @SubscribeEvent
-                public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                    LocalDate dateNow = LocalDate.now();
-                    LocalTime timeNow = LocalTime.now();
-                    String formattedTime = timeNow.format(timeFormatter);
-                    String formattedDate = dateNow.format(dateFormatter);
-                    ServerPlayer player = (ServerPlayer) event.getEntity();
-                    String playerName = player.getGameProfile().getName();
-                    logMessageToFile("[" + formattedTime + " | " + formattedDate + "] " + playerName + " вышел.");
-                }
-
-            }}
-
-
-
-
-        }
+     }
 }
