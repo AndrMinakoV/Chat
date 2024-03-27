@@ -39,6 +39,8 @@ public class Chat {
     public static final String MODID = "chat";
     private static final Logger LOGGER = Logger.getLogger(MODID);
 
+    private static final String path = "/home/andrey/mecheniy/server/MagicRPG1192_logger_public_logs/logs/chat";
+
     public Chat(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ChatConfig.spec);
 
@@ -89,7 +91,7 @@ public class Chat {
                 String messageWithoutFirstChar = rawMessage.substring(1);
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar.replaceAll("&([0-9a-fk-or])", "§$1")));
                 MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
-                MessageLogger.logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
+                MessageLogger.logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""), path);
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
 
             }
@@ -97,7 +99,7 @@ public class Chat {
                 chatTag = "L";
                 formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage.replaceAll("&([0-9a-fk-or])", "§$1")));
                 MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
-                MessageLogger.logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
+                MessageLogger.logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""), path);
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
             }
         }

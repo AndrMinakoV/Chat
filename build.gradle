@@ -139,7 +139,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
     compileOnly 'net.luckperms:api:5.4' // Убедитесь, что версия соответствует той, что вам нужна
     implementation ("net.dv8tion:JDA:5.0.0-beta.1") // Убедитесь, что версия соответствует той, что требуется для discord4j-core
-    implementation "org.enigma:neologger:1.0"
+    implementation "org.enigma:neologger:1.0.1"
 
 
 
@@ -173,7 +173,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'org.enigma'
             artifactId = 'neochat'
-            version = "1.0.2"
+            version = "1.0.3"
 
             from components.java
 
