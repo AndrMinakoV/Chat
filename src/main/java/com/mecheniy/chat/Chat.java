@@ -1,5 +1,6 @@
 package com.mecheniy.chat;
 
+import com.mecheniy.chat.commands.CommandRegistry;
 import com.mecheniy.chat.utilities.ChatConfig;
 import com.mecheniy.chat.utilities.MessageFunctions;
 import com.mojang.brigadier.ParseResults;
@@ -10,7 +11,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -43,8 +46,8 @@ public class Chat {
 
     public Chat(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ChatConfig.spec);
-
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+
     }
 
     private void setup(final FMLCommonSetupEvent event) {
@@ -53,6 +56,11 @@ public class Chat {
         // Применяем настройки, считанные из конфига
         System.out.println("Название чата из конфига: " + chatName);
         // Здесь можете добавить код, который должен выполниться с учетом настроек конфига перед запуском сервера
+    }
+
+    @SubscribeEvent
+    public static void onServerStarting(RegisterCommandsEvent event) {
+        CommandRegistry.register(event.getDispatcher());
     }
     @Mod.EventBusSubscriber(modid = Chat.MODID)
     public static class ForgeBeautifulChatEvent {
@@ -68,7 +76,7 @@ public class Chat {
                 CachedMetaData metaData = user.getCachedData().getMetaData();
                 prefix = metaData.getPrefix();
                 if (prefix == null) {
-                    prefix = "";
+                    prefix = "§8[§7Игрок§8]";
                 }
             }
 
@@ -85,20 +93,38 @@ public class Chat {
             event.setCanceled(true);
             String chatTag;
             Component formattedMessage;
+            boolean isPex = false;
+            if(!prefix.equals("§8[§7Игрок§8]")){
+                isPex = true;
+            }
+
+
 
            if (rawMessage.startsWith("!")){
                 chatTag = "G";
                 String messageWithoutFirstChar = rawMessage.substring(1);
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar.replaceAll("&([0-9a-fk-or])", "§$1")));
-                MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
+
+                if(isPex){
+                    formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar.replaceAll("&([0-9a-fk-or])", "§$1")));
+                    MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
+                } else {
+                    formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: ").append(Component.literal(messageWithoutFirstChar));
+                    MessageFunctions.broadcastMessageGlobal(server, formattedMessage);
+                }
                 MessageLogger.logMessageToFile(("[" + formattedTime + " | " +  formattedDate + "] " +" [" + chatTag + "] " + prefix + " " + playerName + ": " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""), path);
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + messageWithoutFirstChar).replaceAll("[&§]([0-9a-fk-or])", ""));
 
             }
             else {
                 chatTag = "L";
-                formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage.replaceAll("&([0-9a-fk-or])", "§$1")));
-                MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
+                if (isPex){
+                    formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage.replaceAll("&([0-9a-fk-or])", "§$1")));
+                    MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
+                } else {
+                    formattedMessage = Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§a" + chatTag + "§8] " + prefix + " §7" + playerName + "§8: ").append(Component.literal(rawMessage));
+                    MessageFunctions.broadcastMessageLocal(serverPlayer, formattedMessage);
+                }
+
                 MessageLogger.logMessageToFile(("[" + formattedTime + " | " + formattedDate + "] " +" [" +chatTag + "] " + prefix + " " + playerName + ": " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""), path);
                 System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§6" + chatTag + "§8] "  + prefix + " §7" + playerName + "§8: " + rawMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
             }
