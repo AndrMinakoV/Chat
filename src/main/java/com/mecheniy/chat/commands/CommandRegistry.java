@@ -2,6 +2,7 @@ package com.mecheniy.chat.commands;
 
 import com.mecheniy.chat.Chat;
 import com.mecheniy.chat.utilities.MessageFunctions;
+import com.mecheniy.chat.utilities.PermissionUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -25,13 +26,14 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = Chat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CommandRegistry {
     private static final String path = "/home/andrey/mecheniy/server/MagicRPG1192_logger_public_logs/logs/chat";
     public static void register(CommandDispatcher<CommandSourceStack> source){
-        LiteralCommandNode<CommandSourceStack> literalCommandNode = source.register(Commands.literal("wtest")
+        LiteralCommandNode<CommandSourceStack> literalCommandNode = source.register(Commands.literal("m")
                 .then(Commands.argument("player", EntityArgument.player())
                         .suggests(PLAYER_SUGGESTIONS_PROVIDER)
                         .then(Commands.argument("message", MessageArgument.message())
@@ -73,7 +75,7 @@ public class CommandRegistry {
         }
         User senderUser = LuckPermsProvider.get().getUserManager().getUser(serverPlayer.getUUID());
         User targetUser = LuckPermsProvider.get().getUserManager().getUser(target.getUUID());
-        String prefixSender, prefixTarget;
+        String prefixSender = "", prefixTarget = "";
         if (senderUser != null) {
             CachedMetaData metaData = senderUser.getCachedData().getMetaData();
             prefixSender = metaData.getPrefix();
@@ -81,25 +83,24 @@ public class CommandRegistry {
                 prefixSender = "§8[§7Игрок§8]";
             }
         }
+        if (targetUser != null) {
+            CachedMetaData metaData = targetUser.getCachedData().getMetaData();
+            prefixTarget = metaData.getPrefix();
+            if (prefixTarget == null) {
+                prefixTarget = "§8[§7Игрок§8]";
+            }
+        }
         LocalTime timeNow = LocalTime.now();
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         String formattedTime = timeNow.format(timeFormatter);
         String finalMessage = message.getString();
-        target.sendSystemMessage(Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + senderUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString() + " -> §6Вы§8: §r" + finalMessage));
-        System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + senderUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString() + " -> §6Вы§8: §r" + finalMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
-        MessageLogger.logMessageToFile(("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + senderUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString() + " -> §6Вы§8: §r" + finalMessage).replaceAll("[&§]([0-9a-fk-or])", ""), path);
-        serverPlayer.sendSystemMessage(Component.literal("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + "§6Вы §r-> " + targetUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString()
-                + "§8: §r" + finalMessage));
-        System.out.println(("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + "§6Вы §r-> " + targetUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString()
-                + "§8: §r" + finalMessage).replaceAll("[&§]([0-9a-fk-or])", ""));
-        MessageLogger.logMessageToFile(("§8[" + "§7" + formattedTime + "§8] " + "[§bPM§8] "
-                + "§6Вы §r-> " + targetUser.getCachedData().getMetaData().getPrefix() + " §7" + serverPlayer.getName().getString()
-                + "§8: §r" + finalMessage).replaceAll("[&§]([0-9a-fk-or])", ""), path);
+        String timeInMessage = "§8[" + "§7" + formattedTime + "§8] ";
+        if(PermissionUtils.hasPermission(senderUser, "chat.pmcolor")){
+            finalMessage = finalMessage.replaceAll("&([0-9a-fr)])", "§$1");
+        }
+        serverPlayer.sendSystemMessage(Component.literal(timeInMessage + "§7Вы §6-> " + prefixSender + "§7 " + serverPlayer.getName().getString() + "§8: §r" + finalMessage));
+        target.sendSystemMessage(Component.literal(timeInMessage + prefixTarget + "§7 " + serverPlayer.getName().getString() + "§6 -> §7Вы§8: §r" + finalMessage));
+
         return 1;
     }
 }
