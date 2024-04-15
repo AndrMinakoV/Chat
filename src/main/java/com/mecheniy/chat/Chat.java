@@ -3,10 +3,12 @@ package com.mecheniy.chat;
 import com.mecheniy.chat.commands.CommandRegistry;
 import com.mecheniy.chat.utilities.ChatConfig;
 import com.mecheniy.chat.utilities.MessageFunctions;
+import com.mecheniy.chat.utilities.PermissionUtils;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.neoxygen.neologger.NeoLogger;
 import com.neoxygen.neologger.chat.MessageLogger;
+import net.luckperms.api.LuckPerms;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -93,11 +95,8 @@ public class Chat {
             event.setCanceled(true);
             String chatTag;
             Component formattedMessage;
-            boolean isPex = false;
-            if(!prefix.equals("§8[§7Игрок§8]")){
-                isPex = true;
-            }
 
+            boolean isPex = PermissionUtils.hasPermission(user, "chat.color");
 
 
            if (rawMessage.startsWith("!")){
