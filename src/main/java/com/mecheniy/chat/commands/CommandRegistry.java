@@ -98,8 +98,8 @@ public class CommandRegistry {
         if(PermissionUtils.hasPermission(senderUser, "chat.pmcolor")){
             finalMessage = finalMessage.replaceAll("&([0-9a-fr)])", "§$1");
         }
-        serverPlayer.sendSystemMessage(Component.literal(timeInMessage + "§7Вы §6-> " + prefixSender + "§7 " + serverPlayer.getName().getString() + "§8: §r" + finalMessage));
-        target.sendSystemMessage(Component.literal(timeInMessage + prefixTarget + "§7 " + serverPlayer.getName().getString() + "§6 -> §7Вы§8: §r" + finalMessage));
+        serverPlayer.sendSystemMessage(Component.literal(timeInMessage + "§7Вы §6-> " + prefixTarget + "§7 " + target.getName().getString() + "§8: §r" + finalMessage));
+        target.sendSystemMessage(Component.literal(timeInMessage + prefixSender + "§7 " + serverPlayer.getName().getString() + "§6 -> §7Вы§8: §r" + finalMessage));
 
         return 1;
     }
